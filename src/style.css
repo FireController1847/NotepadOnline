@@ -82,10 +82,10 @@ body {
     height: 0px;
     margin: 6px 0px 6px 22px;
 }
-#submenus > div button span:first-of-type {
+#submenus > div button > span:first-of-type {
     float: left;
 }
-#submenus > div button span:last-of-type {
+#submenus > div button > span:last-of-type {
     float: right;
 }
 #submenu-file {
