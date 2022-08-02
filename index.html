@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Untitled - Notepad Online</title>
+    <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8" />
+</head>
+<body>
+    <section id="menu-area">
+        <div id="menu-file"><button id="btn-menu-file" type="button" tabindex="1"><span class="hotkey">F</span>ile</button></div>
+        <div id="menu-edit"><button id="btn-menu-edit" type="button" tabindex="20"><span class="hotkey">E</span>dit</button></div>
+        <div id="menu-format"><button id="btn-menu-format" type="button" tabindex="40">F<span class="hotkey">o</span>rmat</button></div>
+        <div id="menu-view"><button id="btn-menu-view" type="button" tabindex="60"><span class="hotkey">V</span>iew</button></div>
+        <div id="menu-help"><button id="btn-menu-help" type="button" tabindex="80"><span class="hotkey">H</span>elp</button></div>
+    </section>
+    <section id="submenus">
+        <div id="submenu-file" class="submenu closed">
+            <div id="submenu-file-new"><button id="btn-submenu-file-new" type="button" tabindex="-1"><span>New</span><span>Ctrl+N</span></button></button></div>
+            <div id="submenu-file-newtab"><button id="btn-submenu-file-newtab" type="button" tabindex="-1"><span>New Tab</span><span>Ctrl+Shift+N</span></button></button></div>
+            <div id="submenu-file-open"><button id="btn-submenu-file-open" type="button" tabindex="-1"><span>Open...</span><span>Ctrl+O</span></button></button></div>
+            <div id="submenu-file-save"><button id="btn-submenu-file-save" type="button" tabindex="-1"><span>Save</span><span>Ctrl+S</span></button></button></div>
+            <div id="submenu-file-saveas"><button id="btn-submenu-file-saveas" type="button" tabindex="-1"><span>Save As...</span><span>Ctrl+Shift+S</span></button></button></div>
+            <hr>
+            <div id="submenu-file-pagesetup"><button id="btn-submenu-file-pagesetup" type="button" tabindex="-1"><span>Page Setup</span><span></span></button></button></div>
+            <div id="submenu-file-print"><button id="btn-submenu-file-print" type="button" tabindex="-1"><span>Print...</span><span>Ctrl+P</span></button></button></div>
+            <hr>
+            <div id="submenu-file-exit"><button id="btn-submenu-file-exit" type="button" tabindex="-1"><span>Exit</span><span></span></button></button></div>
+        </div>
+        <div id="submenu-edit" class="submenu closed">
+            <div id="submenu-edit-undo"><button id="btn-submenu-edit-undo" type="button" tabindex="-1" class="disabled"><span>Undo</span><span>Ctrl+Z</span></button></button></div>
+            <hr>
+            <div id="submenu-edit-cut"><button id="btn-submenu-edit-cut" type="button" tabindex="-1" class="disabled"><span>Cut</span><span>Ctrl+X</span></button></button></div>
+            <div id="submenu-edit-copy"><button id="btn-submenu-edit-copy" type="button" tabindex="-1" class="disabled"><span>Copy</span><span>Ctrl+C</span></button></button></div>
+            <div id="submenu-edit-paste"><button id="btn-submenu-edit-paste" type="button" tabindex="-1" class="disabled"><span>Paste</span><span>Ctrl+V</span></button></button></div>
+            <div id="submenu-edit-delete"><button id="btn-submenu-edit-delete" type="button" tabindex="-1" class="disabled"><span>Delete</span><span>Del</span></button></button></div>
+            <hr>
+            <div id="submenu-edit-search"><button id="btn-submenu-edit-search" type="button" tabindex="-1" class="disabled"><span>Search with Bing...</span><span>Ctrl+E</span></button></button></div>
+            <div id="submenu-edit-find"><button id="btn-submenu-edit-find" type="button" tabindex="-1" class="disabled"><span>Find...</span><span>Ctrl+F</span></button></button></div>
+            <div id="submenu-edit-findnext"><button id="btn-submenu-edit-findnext" type="button" tabindex="-1" class="disabled"><span>Find Next</span><span>F3</span></button></button></div>
+            <div id="submenu-edit-findprevious"><button id="btn-submenu-edit-findprevious" type="button" tabindex="-1" class="disabled"><span>Find Previous</span><span>Shift+F3</span></button></button></div>
+            <div id="submenu-edit-replace"><button id="btn-submenu-edit-replace" type="button" tabindex="-1"><span>Replace...</span><span>Ctrl+H</span></button></button></div>
+            <div id="submenu-edit-goto"><button id="btn-submenu-edit-goto" type="button" tabindex="-1" class="disabled"><span>Go To...</span><span>Ctrl+G</span></button></button></div>
+            <hr>
+            <div id="submenu-edit-selectall"><button id="btn-submenu-edit-selectall" type="button" tabindex="-1"><span>Select All</span><span>Ctrl+A</span></button></button></div>
+            <div id="submenu-edit-timedate"><button id="btn-submenu-edit-timedate" type="button" tabindex="-1"><span>Time/Date</span><span>F5</span></button></button></div>
+        </div>
+        <div id="submenu-format" class="submenu closed">
+            <div id="submenu-format-wordwrap"><button id="btn-submenu-format-wordwrap" type="button" tabindex="-1"><span>Word Wrap</span><span></span></button></button></div>
+            <div id="submenu-format-font"><button id="btn-submenu-format-font" type="button" tabindex="-1"><span>Font...</span><span></span></button></button></div>
+        </div>
+        <div id="submenu-view" class="submenu closed">
+            <div id="submenu-view-zoom"><button id="btn-submenu-view-zoom" type="button" tabindex="-1"><span>Zoom</span><span></span></button></button></div>
+            <div id="submenu-view-statusbar"><button id="btn-submenu-view-statusbar" type="button" tabindex="-1"><span>Status Bar</span><span></span></button></button></div>
+        </div>
+        <div id="submenu-help" class="submenu closed">
+            <div id="submenu-help-viewhelp"><button id="btn-submenu-help-viewhelp" type="button" tabindex="-1"><span>View Help</span><span></span></button></button></div>
+            <div id="submenu-help-feedback"><button id="btn-submenu-help-feedback" type="button" tabindex="-1"><span>Send Feedback</span><span></span></button></button></div>
+            <hr>
+            <div id="submenu-help-about"><button id="btn-submenu-help-about" type="button" tabindex="-1"><span>About Notepad</span><span></span></button></button></div>
+        </div>
+    </section>
+    <section id="text-area" contenteditable="plaintext-only"></section>
+    <section id="info-area">
+        <div id="info-cursor-pos">Ln 1, Col 1</div>
+        <div id="info-zoom">100%</div>
+        <div id="info-eol">Windows (CRLF)</div>
+        <div id="info-charset">UTF-8</div>
+    </section>
+    <script src="./jschardet.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

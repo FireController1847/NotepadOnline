@@ -1,0 +1,199 @@
+/* Font */
+* {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* TODO: Add greying out of disabled submenu items. */
+
+/* Body */
+body {
+    margin: 0;
+    font-size: 12px;
+}
+
+/* Menu Area */
+#menu-area {
+    position: fixed;
+    display: flex;
+    top: 0;
+    height: 20px;
+    width: 100%;
+    border-bottom: 2px solid #f2f2f2;
+    padding-left: 2px;
+    box-sizing: border-box;
+    z-index: 1;
+}
+#menu-area button {
+    height: 20px;
+    line-height: 18px;
+    border: none;
+    background-color: transparent;
+    border-radius: 2px;
+    padding: 0px 8px;
+    font-size: 12px;
+    filter: contrast(1);
+}
+#menu-area button:hover {
+    background-color: #f5f5f5;
+}
+
+/* Submenus */
+#submenus {
+    z-index: 1;
+}
+#submenus > div {
+    top: 20px;
+    position: fixed;
+    padding: 4px 8px;
+    background-color: #f9f9f9;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+}
+#submenus > div button {
+    border: none;
+    background-color: transparent;
+    width: 100%;
+    padding-left: 20px;
+    padding-right: 10px;
+    font-size: 12.5px;
+    line-height: 12.5px;
+    margin: 2px 0;
+}
+#submenus > div button:hover,
+#submenus > div button:focus {
+    border-radius: 3px;
+    color: white;
+    background-color: #0078d4;
+}
+#submenus > div button:focus {
+    outline: none;
+}
+#submenus > div button.disabled {
+    color: rgba(16, 16, 16, 0.3);
+    background-color: transparent;
+}
+#submenus > div button.disabled:hover {
+    color: rgba(16, 16, 16, 0.3);
+    background-color: #f0f0f0;
+}
+#submenus > div hr {
+    border: none;
+    border-top: 1px solid #d7d7d7;
+    height: 0px;
+    margin: 6px 0px 6px 22px;
+}
+#submenus > div button span:first-of-type {
+    float: left;
+}
+#submenus > div button span:last-of-type {
+    float: right;
+}
+#submenu-file {
+    width: 200px;
+}
+#submenu-edit {
+    width: 210px;
+}
+#submenu-format {
+    width: 130px;
+}
+#submenu-view {
+    width: 120px;
+}
+#submenu-help {
+    width: 150px;
+}
+
+/* Text Area */
+#text-area {
+    position: fixed;
+    display: inline-block;
+    top: 20px;
+    right: 0;
+    left: 0;
+    bottom: 24px;
+    padding: 4px;
+    overflow-wrap: anywhere;
+    overflow-y: scroll;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    z-index: -1;
+
+    font-family: Consolas;
+    font-size: 14px;
+    line-height: 16px;
+}
+#text-area:focus {
+    outline: none;
+}
+/* #text-area > * {
+    font-family: Consolas !important;
+    font-size: 14px !important;
+    line-height: 16px;
+} */
+/* #text-area > p {
+    width: 100%;
+    margin: 0;
+} */
+
+/* Info Area */
+#info-area {
+    position: fixed;
+    display: flex;
+    bottom: 0;
+    height: 24px;
+    width: 100%;
+    background-color: #f0f0f0;
+    border-top: 1px solid #d7d7d7;
+    box-sizing: border-box;
+}
+#info-area > div {
+    right: 0;
+    height: 24px;
+    line-height: 24px;
+    border-left: 1px solid #d7d7d7;
+    padding: 0px 5px;
+    box-sizing: border-box;
+    align-self: flex-end;
+}
+#info-area > div:first-of-type {
+    margin-left: auto;
+}
+#info-area > div > * {
+    position: absolute;
+    left: 0;
+}
+#info-charset,
+#info-eol {
+    width: 125px;
+}
+#info-zoom {
+    width: 50px;
+}
+#info-cursor-pos {
+    width: 150px;
+}
+
+/* Classes */
+.hotkey.enabled {
+    text-decoration-line: underline;
+}
+.menu-opened {
+    background-color: #f9f9f9 !important;
+}
+.submenu.closed {
+    left: -9999px;
+}
+.submenu.openanim {
+    animation: fadeInFromNone 75ms ease-in-out;
+}
+
+/* Keyframes */
+@keyframes fadeInFromNone {
+    0% { display: none; opacity: 0; }
+    1% { display: block; opacity: 0; }
+    100% { display: block; opacity: 1; }
+}
+@keyframes blinker {
+    50% { opacity: 0; }
+}
