@@ -9,12 +9,14 @@ var unsavedChanges = false;
 var documentTitle = "Untitled";
 var savedContents = "";
 var documentContents = "";
+var existingFileHandle = null;
 var zoom = 100;
 var fontFamily = "Consolas";
 var fontSize = 14; // in pixels
 var wordWrap = true;
 var lineEndings = "lf";
 var charset = "UTF-8";
+var undoCount = 5;
 
 // Handle Hotkeys
 function updateUnderlineHotkeys(showHotkeys) {
@@ -116,10 +118,33 @@ function handleHotkeys(e) {
         } else if (e.code == "KeyO") {
             document.getElementById("btn-submenu-file-open").click();
             e.preventDefault();
+        } else if (e.shiftKey == true && e.code == "KeyS") {
+            document.getElementById("btn-submenu-file-saveas").click();
+            e.preventDefault();
+        } else if (e.code == "KeyS") {
+            document.getElementById("btn-submenu-file-save").click();
+            e.preventDefault();
         }
     } else if (hotkeysVisible == true) {
         updateUnderlineHotkeys(false);
     }
+}
+
+// Called when the document's contents is changed
+function documentContentsChanged() {
+    if (documentContents != "") {
+        enableSubmenuButton(document.getElementById("btn-submenu-edit-undo"));
+    } else {
+        disableSubmenuButton(document.getElementById("btn-submenu-edit-undo"));
+    }
+}
+
+// Enables or Disables a "Menu Button"
+function enableSubmenuButton(element) {
+    element.classList.remove("disabled");
+}
+function disableSubmenuButton(element) {
+    element.classList.add("disabled");
 }
 
 // Handle Menu Buttons
@@ -317,8 +342,10 @@ function newFile() {
     documentTitle = "Untitled";
     savedContents = "";
     documentContents = "";
+    documentContentsChanged();
     textArea.innerHTML = "";
     unsavedChanges = false;
+    existingFileHandle = null;
     updateTitle();
     updateColAndLn({"ln": 1, "col": 1});
 }
@@ -358,40 +385,84 @@ var utf8ArrayToStr = (function () {
 })();
 
 // Opens an existing file
-function openFile(file) {
-    console.log(file);
-    var reader = new FileReader();
-    reader.onload = function(e) {
-        var detection = jschardet.detect(e.target.result);
-        charset = detection.encoding.toUpperCase();
-        // Force all ASCII into UTF-8
-        // Temporary bug? See https://github.com/aadsm/jschardet/issues/22
-        if (charset == "ASCII") {
-            charset = "UTF-8";
-        }
-        updateCharset();
-        reader = new FileReader();
+function openFile(handle) {
+    newFile();
+    existingFileHandle = handle;
+    existingFileHandle.getFile().then(function(file) {
+        var reader = new FileReader();
         reader.onload = function(e) {
-            var content = e.target.result;
-            if (content.indexOf("\r\n") != -1) {
-                lineEndings = "crlf";
-            } else if (content.indexOf("\r") != -1) {
-                lineEndings = "cr";
-            } else {
-                lineEndings = "lf";
+            var detection = jschardet.detect(e.target.result);
+            charset = detection.encoding.toUpperCase();
+            // Force all ASCII into UTF-8
+            // Temporary bug? See https://github.com/aadsm/jschardet/issues/22
+            if (charset == "ASCII") {
+                charset = "UTF-8";
             }
-            updateLineEndings();
-            savedContents = content;
-            documentContents = content;
-            documentTitle = file.name;
-            textArea.innerHTML = content;
+            updateCharset();
+            reader = new FileReader();
+            reader.onload = function(e) {
+                var content = e.target.result;
+                if (content.indexOf("\r\n") != -1) {
+                    lineEndings = "crlf";
+                } else if (content.indexOf("\r") != -1) {
+                    lineEndings = "cr";
+                } else {
+                    lineEndings = "lf";
+                }
+                updateLineEndings();
+                savedContents = content;
+                documentContents = content;
+                documentContentsChanged();
+                documentTitle = file.name;
+                textArea.innerHTML = content;
+                updateColAndLn(getCaretPosition(document.getElementById("text-area")));
+            }
+            reader.readAsText(file, charset);
+        }
+        reader.readAsBinaryString(file);
+    });
+}
+function save() {
+    console.log("Existing file: ", existingFileHandle);
+    if (existingFileHandle == null) {
+        saveAs();
+        return;
+    }
+    console.log("Saving...");
+    // TODO: Save encodings.
+    // Apply line endings
+    if (lineEndings == "crlf") {
+        documentContents = documentContents.replace(/(?<!\r)\n|\r(?!\n)/g, "\r\n");
+    } else if (lineEndings == "cr") {
+        documentContents = documentContents.replace(/\r\n|\n/g, "\r");
+    } else {
+        documentContents = documentContents.replace(/\r\n|\r/g, "\n");
+    }
+    documentContentsChanged();
+    existingFileHandle.createWritable().then(function(writable) {
+        writable.write(documentContents).then(function(response) {
+            savedContents = documentContents;
             unsavedChanges = false;
             updateTitle();
-            updateColAndLn(getCaretPosition(document.getElementById("text-area")));
-        }
-        reader.readAsText(file, charset);
-    }
-    reader.readAsBinaryString(file);    
+            console.log("Saved!");
+            writable.close();
+        }).catch(function(e) {
+            writable.close();
+            saveAs();
+        })
+    });
+}
+function saveAs() {
+    window.showSaveFilePicker({
+        suggestedName: documentTitle,
+        types: [{
+            description: "Text document",
+            accept: {'text/plain': ['.txt']}
+        }]
+    }).then(function(handle) {
+        existingFileHandle = handle;
+        save();
+    });
 }
 
 // Updates the zoom visually
@@ -431,14 +502,30 @@ function updateCharset() {
     info.innerHTML = charset;
 }
 
+// Called whenever there's a change of selection
+function selectionChange() {
+    var selection = window.getSelection();
+    if (selection.toString() == '') {
+        disableSubmenuButton(document.getElementById("btn-submenu-edit-cut"));
+        disableSubmenuButton(document.getElementById("btn-submenu-edit-copy"));
+        disableSubmenuButton(document.getElementById("btn-submenu-edit-delete"));
+        disableSubmenuButton(document.getElementById("btn-submenu-edit-search"));
+    } else {
+        enableSubmenuButton(document.getElementById("btn-submenu-edit-cut"));
+        enableSubmenuButton(document.getElementById("btn-submenu-edit-copy"));
+        enableSubmenuButton(document.getElementById("btn-submenu-edit-delete"));
+        enableSubmenuButton(document.getElementById("btn-submenu-edit-search"));
+    }
+}
+
 // Handle Keystrokes
 document.addEventListener("keydown", function(e) {
     console.log(e);
     handleHotkeys(e);
 }, { passive: false });
 document.addEventListener("selectionchange", function(e) {
-    var selection = window.getSelection();
-    if (selection != null && document.activeElement == textArea) {
+    selectionChange();
+    if (window.getSelection() != null && document.activeElement == textArea) {
         updateColAndLn(getCaretPosition(document.getElementById("text-area")));
     }
 });
@@ -538,21 +625,99 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
     var submenuFileOpen = document.getElementById("btn-submenu-file-open");
     submenuFileOpen.onclick = function() {
-        var input = document.createElement("input");
-        input.type = "file";
-        input.accept = ".txt";
-        input.onchange = function(e) {
-            console.log(e);
-            var file = e.target.files[0];
-            openFile(file);
-        }
-        input.click();
+        window.showOpenFilePicker({
+            types: [{
+                description: "Text document",
+                accept: {'text/plain': ['.txt']}
+            }],
+            multiple: false
+        }).then(function(handles) {
+            openFile(handles[0]);
+        });
+        closeSubmenu();
+    }
+
+    var submenuFileSave = document.getElementById("btn-submenu-file-save");
+    submenuFileSave.onclick = function() {
+        save();
+        closeSubmenu();
+    }
+
+    var submenuFileSaveAs = document.getElementById("btn-submenu-file-saveas");
+    submenuFileSaveAs.onclick = function() {
+        saveAs();
         closeSubmenu();
     }
 
     var submenuFileExit = document.getElementById("btn-submenu-file-exit");
     submenuFileExit.onclick = function() {
         window.close();
+    }
+
+    var submenuEditUndo = document.getElementById("btn-submenu-edit-undo");
+    submenuEditUndo.onclick = function() {
+        if (submenuEditUndo.classList.contains("disabled")) {
+            return;
+        }
+        for (var i = 0; i < undoCount; i++) {
+            document.execCommand("undo");
+        }
+        closeSubmenu();
+    }
+
+    var submenuEditCut = document.getElementById("btn-submenu-edit-cut");
+    submenuEditCut.onclick = function() {
+        if (submenuEditCut.classList.contains("disabled")) {
+            return;
+        }
+        closeSubmenu();
+        var selection = window.getSelection();
+        var text = selection.toString();
+        navigator.clipboard.writeText(text).then(function() {
+            selection.deleteFromDocument();
+            selectionChange();
+        });
+    }
+
+    var submenuEditCopy = document.getElementById("btn-submenu-edit-copy");
+    submenuEditCopy.onclick = function() {
+        if (submenuEditCopy.classList.contains("disabled")) {
+            return;
+        }
+        closeSubmenu();
+        var selection = window.getSelection();
+        var text = selection.toString();
+        navigator.clipboard.writeText(text);
+    }
+
+    var submenuEditDelete = document.getElementById("btn-submenu-edit-delete");
+    submenuEditDelete.onclick = function() {
+        if (submenuEditDelete.classList.contains("disabled")) {
+            return;
+        }
+        var selection = window.getSelection();
+        selection.deleteFromDocument();
+        selectionChange();
+        closeSubmenu();
+    }
+
+    var submenuEditPaste = document.getElementById("btn-submenu-edit-paste");
+    submenuEditPaste.onclick = function() {
+        closeSubmenu();
+        var ta = document.getElementById("text-area");
+        ta.focus();
+        navigator.clipboard.readText().then(function(text) {
+            insertAtCaret(ta, text, true);
+        });
+    }
+
+    var submenuEditSearch = document.getElementById("btn-submenu-edit-search");
+    submenuEditSearch.onclick = function() {
+        if (submenuEditSearch.classList.contains("disabled")) {
+            return;
+        }
+        closeSubmenu();
+        window.open("https://www.bing.com/search?q=" + encodeURI(window.getSelection().toString()));
     }
 
     var submenuEditSelectAll = document.getElementById("btn-submenu-edit-selectall");
@@ -597,6 +762,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
         // Update document contents
         documentContents = textArea.innerHTML;
+        documentContentsChanged();
 
         // Mark unsaved changes
         if (documentContents == savedContents) {
