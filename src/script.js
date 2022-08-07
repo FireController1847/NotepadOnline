@@ -132,6 +132,13 @@ function handleHotkeys(e) {
 
 // Called when the document's contents is changed
 function documentContentsChanged() {
+    documentContents = document.getElementById("text-area").innerHTML;
+    if (documentContents.replace(/\r|\n/g, "") != savedContents.replace(/\r|\n/g, "")) {
+        unsavedChanges = true;
+    } else {
+        unsavedChanges = false;
+    }
+    updateTitle();
     if (documentContents != "") {
         enableSubmenuButton(document.getElementById("btn-submenu-edit-undo"));
     } else {
@@ -308,6 +315,9 @@ function insertAtCaret(element, text, shouldDelete = false) {
 
     // Move range to encompass everything
     range.insertNode(node);
+    
+    // Document contents changed
+    documentContentsChanged();
 
     // Update start
     range.setStart(node, 0);
@@ -342,12 +352,10 @@ function newFile() {
     documentTitle = "Untitled";
     savedContents = "";
     documentContents = "";
-    documentContentsChanged();
     textArea.innerHTML = "";
-    unsavedChanges = false;
     existingFileHandle = null;
-    updateTitle();
     updateColAndLn({"ln": 1, "col": 1});
+    documentContentsChanged();
 }
 
 var utf8ArrayToStr = (function () {
@@ -412,10 +420,10 @@ function openFile(handle) {
                 updateLineEndings();
                 savedContents = content;
                 documentContents = content;
-                documentContentsChanged();
                 documentTitle = file.name;
                 textArea.innerHTML = content;
                 updateColAndLn(getCaretPosition(document.getElementById("text-area")));
+                documentContentsChanged();
             }
             reader.readAsText(file, charset);
         }
@@ -438,12 +446,10 @@ function save() {
     } else {
         documentContents = documentContents.replace(/\r\n|\r/g, "\n");
     }
-    documentContentsChanged();
     existingFileHandle.createWritable().then(function(writable) {
         writable.write(documentContents).then(function(response) {
             savedContents = documentContents;
-            unsavedChanges = false;
-            updateTitle();
+            documentContentsChanged();
             console.log("Saved!");
             writable.close();
         }).catch(function(e) {
@@ -671,12 +677,15 @@ document.addEventListener("DOMContentLoaded", function(e) {
             return;
         }
         closeSubmenu();
-        var selection = window.getSelection();
-        var text = selection.toString();
-        navigator.clipboard.writeText(text).then(function() {
-            selection.deleteFromDocument();
-            selectionChange();
-        });
+        document.execCommand("cut");
+        documentContentsChanged();
+        // var selection = window.getSelection();
+        // var text = selection.toString();
+        // navigator.clipboard.writeText(text).then(function() {
+        //     selection.deleteFromDocument();
+        //     selectionChange();
+        //     documentContentsChanged();
+        // });
     }
 
     var submenuEditCopy = document.getElementById("btn-submenu-edit-copy");
@@ -698,6 +707,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
         var selection = window.getSelection();
         selection.deleteFromDocument();
         selectionChange();
+        documentContentsChanged();
         closeSubmenu();
     }
 
@@ -743,6 +753,20 @@ document.addEventListener("DOMContentLoaded", function(e) {
         closeSubmenu();
     }
 
+    var submenuViewStatusbar = document.getElementById("btn-submenu-view-statusbar");
+    submenuViewStatusbar.onclick = function() {
+        var el = document.getElementById("info-area");
+        console.log(el.style.display);
+        if (el.style.display == "") {
+            el.style.display = "none";
+            document.getElementById("text-area").style.bottom = "0px";
+        } else {
+            el.style.display = "";
+            document.getElementById("text-area").style.bottom = "24px";
+        }
+        closeSubmenu();
+    }
+
     // Submenu Hover Events
     var submenus = document.getElementById("submenus");
     for (var i = 0; i < submenus.children.length; i++) {
@@ -763,14 +787,5 @@ document.addEventListener("DOMContentLoaded", function(e) {
         // Update document contents
         documentContents = textArea.innerHTML;
         documentContentsChanged();
-
-        // Mark unsaved changes
-        if (documentContents == savedContents) {
-            unsavedChanges = false;
-            updateTitle();
-        } else {
-            unsavedChanges = true;
-            updateTitle();
-        }
     });
 });
